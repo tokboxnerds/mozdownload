@@ -1,0 +1,37 @@
+{
+  "name": "mozdownload",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "ejs": "^1.0.0",
+    "express": "^4.1.1",
+    "coffee-script": "^1.7.1",
+    "string": "^1.8.1",
+    "request": "^2.34.0",
+    "cheerio": "^0.15.0",
+    "semver": "^2.2.1"
+  },
+  "jshintConfig": {
+    "globalstrict": true,
+    "node": true,
+    "browser": true,
+    "esnext": true,
+    "strict": false,
+    "camelcase": true,
+    "eqeqeq": true,
+    "eqnull": true,
+    "expr": true,
+    "indent": 2,
+    "latedef": true,
+    "maxlen": 100,
+    "newcap": true,
+    "quotmark": "single",
+    "smarttabs": true,
+    "trailing": true,
+    "undef": true,
+    "unused": true
+  }
+}
