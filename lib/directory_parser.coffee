@@ -9,7 +9,9 @@ module.exports = (path, callback)->
 
     if response.statusCode != 200
       console.log response.statusCode
-      callback Error "Path not found"
+      error = Error "Path not found"
+      error.statusCode = response.statusCode
+      callback error
       return
 
     try

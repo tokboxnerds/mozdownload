@@ -19,6 +19,10 @@ app.get '', (req, res, next)->
   scraper req.query.type, req.query.platform, "firefox", req.query.locale, version, req.query.stub == 'true', (err, result)->
     if err
       next err
+    else if req.query.do == 'redirect'
+      res.redirect result.url
+    else if req.query.do == 'version'
+      res.send result.version
     else
       res.send result
 

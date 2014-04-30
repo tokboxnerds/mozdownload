@@ -41,16 +41,8 @@ class Scraper
         callback err
       else
         callback null,
-          href: downloadUrl
-          version: @extractVersion path.basename downloadUrl
-
-  extractVersion: (fromString, full)->
-    regex = new RegExp "^#{ @application }-(.*)\.#{ @locale }", 'i'
-    if version = fromString.match(regex)?[1]
-      if full
-        version.match(/([0-9]+)\.([0-9]+)([a-z]?)([0-9]*)/)
-      else
-        version
+          url: downloadUrl
+          version: @extractVersion decodeURIComponent path.basename url.parse(downloadUrl).pathname
 
   getBinary: (callback)->
     if @_binary?
@@ -89,6 +81,29 @@ class Scraper
 
 class ReleaseScraper extends Scraper
 
+  extractVersion: (fromString, full)->
+    releasePaths =
+      linux:    '^{{application}}-(.*)\.{{extension}}$'
+      linux64:  '^{{application}}-(.*)\.{{extension}}$'
+      mac:      '^{{application}} (.*)\.{{extension}}$'
+      mac64:    '^{{application}} (.*)\.{{extension}}$'
+      win32:    '^{{application}} Setup{{stub}} (.*)\.{{extension}}$'
+      win64:    '^{{application}} Setup{{stub}} (.*)\.{{extension}}$'
+
+    regex = new RegExp S(releasePaths[@platform]).template(
+      application: @application
+      extension: @extension
+      stub: @isStubInstaller && ' Stub' || ''
+    ).s, 'i'
+
+    if version = fromString.match(regex)?[1]
+      if full
+        version.match(/([0-9]+)\.([0-9]+)([a-z]?)([0-9]*)/)
+      else
+        version
+    else
+      console.log 'compared', version, fromString, regex
+
   binaryRegex: ->
     releasePaths =
       linux:    '^{{application}}-.*\.{{extension}}$'
@@ -105,9 +120,17 @@ class ReleaseScraper extends Scraper
     ).s
 
   pathComponent: ->
-    "releases/#{@version}/#{@platform}/#{@locale}"
+    "releases/#{@version}/#{PLATFORM_FRAGMENTS[@platform]}/#{@locale}"
 
 class NightlyScraper extends Scraper
+
+  extractVersion: (fromString, full)->
+    regex = new RegExp "^#{ @application }-(.*)\.#{ @locale }", 'i'
+    if version = fromString.match(regex)?[1]
+      if full
+        version.match(/([0-9]+)\.([0-9]+)([a-z]?)([0-9]*)/)
+      else
+        version
 
   binaryRegex: ->
     base = '^{{application}}-.*\.{{locale}}\.{{platform}}'
