@@ -8,7 +8,7 @@ module.exports = (path, callback)->
   request.get uri: path, headers: headers, (err, response, body)->
 
     if response.statusCode != 200
-      console.log response.statusCode
+      console.log response.statusCode, path
       error = Error "Path not found"
       error.statusCode = response.statusCode
       callback error

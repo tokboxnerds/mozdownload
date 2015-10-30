@@ -1,4 +1,4 @@
-BASE_URL = 'https://ftp.mozilla.org/pub/mozilla.org'
+BASE_URL = 'https://ftp.mozilla.org/pub'
 
 APPLICATIONS = ['b2g', 'firefox', 'thunderbird']
 
@@ -30,7 +30,7 @@ urljoin = (a, b)->
   pre.format()
 
 class Scraper
-  
+
   constructor: (@platform, @application, @locale, @version = 'latest', @isStubInstaller, extension, base_url=BASE_URL)->
     @base_url = urljoin base_url, @application
     @extension = extension or DEFAULT_FILE_EXTENSIONS[@platform]
@@ -59,6 +59,7 @@ class Scraper
         if (@_binary = @pickEntry(entries))?
           callback null, @_binary
         else
+          console.log 'entries', entries, @binaryRegex()
           callback Error 'No matching binary found'
 
   pickEntry: (entries)->
@@ -68,7 +69,7 @@ class Scraper
       if binary = entry.match(pattern)?[0]
         break
     binary
-     
+
   path: ->
     urljoin @base_url, @pathComponent()
 
@@ -83,12 +84,12 @@ class ReleaseScraper extends Scraper
 
   extractVersion: (fromString, full)->
     releasePaths =
-      linux:    '^{{application}}-(.*)\.{{extension}}$'
-      linux64:  '^{{application}}-(.*)\.{{extension}}$'
-      mac:      '^{{application}} (.*)\.{{extension}}$'
-      mac64:    '^{{application}} (.*)\.{{extension}}$'
-      win32:    '^{{application}} Setup{{stub}} (.*)\.{{extension}}$'
-      win64:    '^{{application}} Setup{{stub}} (.*)\.{{extension}}$'
+      linux:    '\/{{application}}-(.*)\.{{extension}}$'
+      linux64:  '\/{{application}}-(.*)\.{{extension}}$'
+      mac:      '\/{{application}} (.*)\.{{extension}}$'
+      mac64:    '\/{{application}} (.*)\.{{extension}}$'
+      win32:    '\/{{application}} Setup{{stub}} (.*)\.{{extension}}$'
+      win64:    '\/{{application}} Setup{{stub}} (.*)\.{{extension}}$'
 
     regex = new RegExp S(releasePaths[@platform]).template(
       application: @application
@@ -106,12 +107,12 @@ class ReleaseScraper extends Scraper
 
   binaryRegex: ->
     releasePaths =
-      linux:    '^{{application}}-.*\.{{extension}}$'
-      linux64:  '^{{application}}-.*\.{{extension}}$'
-      mac:      '^{{application}}.*\.{{extension}}$'
-      mac64:    '^{{application}}.*\.{{extension}}$'
-      win32:    '^{{application}}.*{{stub}}.*\.{{extension}}$'
-      win64:    '^{{application}}.*{{stub}}.*\.{{extension}}$'
+      linux:    '\/{{application}}-.*\.{{extension}}$'
+      linux64:  '\/{{application}}-.*\.{{extension}}$'
+      mac:      '\/{{application}}.*\.{{extension}}$'
+      mac64:    '\/{{application}}.*\.{{extension}}$'
+      win32:    '\/{{application}}.*{{stub}}.*\.{{extension}}$'
+      win64:    '\/{{application}}.*{{stub}}.*\.{{extension}}$'
 
     S(releasePaths[@platform]).template(
       application: @application
@@ -120,12 +121,12 @@ class ReleaseScraper extends Scraper
     ).s
 
   pathComponent: ->
-    "releases/#{@version}/#{PLATFORM_FRAGMENTS[@platform]}/#{@locale}"
+    "releases/#{@version}/#{PLATFORM_FRAGMENTS[@platform]}/#{@locale}/"
 
 class NightlyScraper extends Scraper
 
   extractVersion: (fromString, full)->
-    regex = new RegExp "^#{ @application }-(.*)\.#{ @locale }", 'i'
+    regex = new RegExp "\/#{ @application }-(.*)\.#{ @locale }", 'i'
     if version = fromString.match(regex)?[1]
       if full
         version.match(/([0-9]+)\.([0-9]+)([a-z]?)([0-9]*)/)
@@ -133,7 +134,7 @@ class NightlyScraper extends Scraper
         version
 
   binaryRegex: ->
-    base = '^{{application}}-.*\.{{locale}}\.{{platform}}'
+    base = '\/{{application}}-.*\.{{locale}}\.{{platform}}'
     suffix =
       linux: '\.{{extension}}$'
       linux64: '\.{{extension}}$'
@@ -151,7 +152,7 @@ class NightlyScraper extends Scraper
     ).s
 
   pathComponent: ->
-    "nightly/latest-#{@version}"
+    "nightly/latest-#{@version}/"
 
   pickEntry: (entries)->
     pattern = new RegExp @binaryRegex(), 'i'
